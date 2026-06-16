@@ -22,70 +22,9 @@ def load_data():
     food["taken_at"] = pd.to_datetime(food["taken_at"], errors="coerce")
     food["year"] = food["taken_at"].dt.year.fillna(0).astype(int)
 
-    # 補縮圖
-    thumb_rows = []
-    with open("新竹美食.ndjson", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            r = json.loads(line)
-            d = r["data"]
-            image_versions = d.get("image_versions2", {}) or {}
-            candidates = image_versions.get("candidates", []) or []
-            thumbnail = candidates[-1]["url"] if candidates else ""
-            thumb_rows.append({
-                "post_code": d.get("code", ""),
-                "thumbnail": thumbnail
-            })
+    # thumbnail, store_name, display_name 已在 CSV 中
 
-    df_thumb = pd.DataFrame(thumb_rows)
-    food = food.merge(df_thumb, on="post_code", how="left")
-
-    # 店名
-    def extract_store_name(caption, address):
-        if not caption or not address:
-            return ""
-
-        lines = caption.replace("\\n", "\n").split("\n")
-
-        for i, line in enumerate(lines):
-            if address.replace(", ", "") in line.replace(", ", ""):
-                for j in range(i - 1, max(i - 4, -1), -1):
-                    prev = lines[j].strip()
-                    prev = re.sub(r'^[\d\.\s🏷️📍🏠✅⚠️💡◼️►\-\*]+', '', prev).strip()
-                    prev = re.sub(r'^(店家|地址|名稱)\s*[:：]\s*', '', prev).strip()
-                    if prev and len(prev) > 1:
-                        return prev
-
-        return ""
-
-    def clean_store_name(name):
-        if not name:
-            return ""
-
-        if re.search(r'\d{4}\s?\d{3}\s?\d{3}', name):
-            return ""
-
-        name = re.sub(r'^[①②③④⑤⑥⑦⑧⑨⑩\d\.\s🌟⭐✨🔆💫]+', '', name).strip()
-        name = re.sub(r'\s*@\w+.*$', '', name).strip()
-
-        if len(name) > 15:
-            return ""
-
-        return name
-
-    food["store_name"] = food.apply(
-        lambda row: extract_store_name(row["caption"], row["address"]),
-        axis=1
-    )
-    food["store_name"] = food["store_name"].apply(clean_store_name)
-    food["display_name"] = food.apply(
-        lambda row: row["store_name"] if row["store_name"] else row["address"],
-        axis=1
-    )
-
-    # 美食行政區
+        # 美食行政區
     def get_area(address):
         areas = [
             "東區", "北區", "香山區",
