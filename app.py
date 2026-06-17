@@ -254,12 +254,7 @@ min_likes = st.sidebar.slider(
 )
 
 st.sidebar.subheader("⚠️ 性犯罪熱點")
-
-selected_crime_areas = st.sidebar.multiselect(
-    "熱點地區",
-    options=crime_areas,
-    default=[]
-)
+show_crime = st.sidebar.checkbox("顯示性犯罪熱點", value=True)
 
 # ── 美食資料篩選：若有輸入路名，先依路名縮小，再套用下方篩選器 ──
 food_to_show = food_found.iloc[0:0].copy()
