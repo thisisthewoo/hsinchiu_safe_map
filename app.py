@@ -140,7 +140,9 @@ def load_data():
 
         return "一般"
 
-    food["area"] = food["address"].apply(get_area)
+    food["area"] = food.apply(get_area_from_district, axis=1)
+    food["area"] = food.apply(fix_area, axis=1)
+    food = food[food["area"] != "其他"].copy()
     food["food_type"] = food.apply(get_food_type, axis=1)
     food["friendly_type"] = food.apply(get_friendly_type, axis=1)
 
