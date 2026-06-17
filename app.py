@@ -24,48 +24,92 @@ def load_data():
 
     # thumbnail, store_name, display_name 已在 CSV 中
 
-        # 美食行政區
-    def get_area(address):
-        areas = [
-            "東區", "北區", "香山區",
-            "竹北市", "竹東鎮", "湖口鄉",
-            "新埔鎮", "關西鎮", "新豐鄉", "芎林鄉"
-        ]
-        for a in areas:
-            if a in str(address):
-                return a
+    # 地區分類
+    north_district = ['舊港里','港北里','海濱里','康樂里','南寮里','中寮里','福林里','古賢里','武陵里','士林里','境福里','光田里','湳中里','金華里','金雅里','湳雅里','光華里','舊社里','金竹里','長和里','水田里','新民里','北門里','新雅里','民富里','大同里','文雅里','中興里','中山里','磐石里','西門里','石坊里','潛園里','崇禮里','中央里','興南里','仁德里','西雅里','大鵬里','南勢里','台溪里','曲溪里','客雅里','中雅里','育英里','北區']
+    east_district = ['東門里','中正里','親仁里','榮光里','育賢里','成功里','三民里','復中里','文華里','錦華里','復興里','前溪里','千甲里','水源里','東勢里','光復里','綠水里','東園里','公園里','東山里','建華里','光明里','武功里','豐功里','軍功里','建功里','立功里','埔頂里','龍山里','科園里','新莊里','關東里','仙水里','金山里','仙宮里','關新里','南門里','關帝里','南市里','福德里','振興里','新興里','頂竹里','下竹里','竹蓮里','寺前里','南大里','光鎮里','柴橋里','高峰里','新光里','湖濱里','明湖里','東區']
+    hsiang_district = ['頂埔里','頂福里','中埔里','埔前里','牛埔里','虎林里','虎山里','港南里','香山里','大庄里','香村里','東香里','美山里','朝山里','樹下里','浸水里','海山里','鹽水里','內湖里','南港里','中隘里','南隘里','大湖里','茄苳里','香山區']
+    zhubei = ['竹仁里','隘口里','中正村','勝利村','竹北里','竹義里','巨埔里','泰和里','鹿鳴里','竹北市']
+    zhudong = ['竹東里','照門里','榮華里','公義里','信義村','中興村','自強里','山下里','三坑里','瑞峰里','溪州里','文山里','東勢里']
+    hukuo = ['湖南村','湖鏡村','松柏村','山崎村','四座里']
+    neiwang = ['內灣村','南興村','聯興里']
+    xinpu = ['田新里','新埔里']
+    guanxi = ['鳳凰村']
+    baoshan = ['寶山村']
+    beipu = ['北埔村']
+    emei = ['峨眉村']
+ 
+    def get_area_from_district(row):
+        district = str(row.get("district", ""))
+        address = str(row.get("address", ""))
+        if district in east_district: return "東區"
+        if district in north_district: return "北區"
+        if district in hsiang_district: return "香山區"
+        if district in zhubei: return "竹北市"
+        if district in zhudong: return "竹東鎮"
+        if district in hukuo: return "湖口鄉"
+        if district in neiwang: return "橫山鄉"
+        if district in xinpu: return "新埔鎮"
+        if district in guanxi: return "關西鎮"
+        if district in baoshan: return "寶山鄉"
+        if district in beipu: return "北埔鄉"
+        if district in emei: return "峨眉鄉"
+        for area in ["竹北市","竹東鎮","湖口鄉","新埔鎮","關西鎮","新豐鄉","芎林鄉","橫山鄉","北埔鄉","寶山鄉","峨眉鄉"]:
+            if area in address or area in district: return area
+        return "其他"
+ 
+    def fix_area(row):
+        if row["area"] != "其他": return row["area"]
+        address = str(row.get("address_clean", ""))
+        if "東區" in address: return "東區"
+        if "北區" in address: return "北區"
+        if "香山區" in address: return "香山區"
         return "其他"
 
-    # 食物分類
+
+	# 食物分類
     def get_food_type(row):
-        name = str(row.get("display_name", "")) + str(row.get("caption", ""))
+    	cap = str(row.get("caption", ""))
+    	tags = " ".join(re.findall(r'#(\w+)', cap))
+    	name = str(row.get("display_name", "")) + cap
 
-        if re.search(r'拉麵|河粉|米粉|麵食|麵館|抄手|餛飩|粄條|螺螄粉', name):
-            return "麵食"
-        if re.search(r'火鍋|涮涮鍋|鍋物', name):
-            return "火鍋"
-        if re.search(r'牛排|豬排|排骨|雞排|燒肉|烤肉', name):
-            return "燒烤肉類"
-        if re.search(r'壽司|生魚片|日式|丼|天婦羅', name):
-            return "日式料理"
-        if re.search(r'披薩|義大利|pasta|漢堡|三明治', name, re.IGNORECASE):
-            return "西式料理"
-        if re.search(r'咖啡|cafe|coffee|下午茶|甜點|蛋糕|鬆餅|可頌', name, re.IGNORECASE):
-            return "咖啡甜點"
-        if re.search(r'珍奶|手搖|飲料|茶飲|果汁', name):
-            return "手搖飲料"
-        if re.search(r'早餐|早午餐|brunch', name, re.IGNORECASE):
-            return "早午餐"
-        if re.search(r'小籠包|水餃|煎餃|包子|饅頭', name):
-            return "點心麵食"
-        if re.search(r'海鮮|蝦|生蠔|蛤蜊|魚', name):
-            return "海鮮"
-        if re.search(r'冰|剉冰|雪花冰|芋圓|豆花', name):
-            return "冰品"
-        if re.search(r'臭豆腐|肉圓|鹽酥雞|炸物|滷味', name):
-            return "台式小吃"
+    # 優先用 hashtag 判斷
+    	if re.search(r'咖啡廳|咖啡|下午茶', tags): return "咖啡廳"
+    	if re.search(r'甜點|蛋糕|冰淇淋', tags): return "甜點冰品"
+    	if re.search(r'火鍋', tags): return "火鍋"
+    	if re.search(r'早午餐', tags): return "早午餐"
+    	if re.search(r'早餐', tags): return "早餐"
+    	if re.search(r'燒肉|烤肉', tags): return "燒烤肉類"
+    	if re.search(r'拉麵|米粉|麵食', tags): return "麵食"
+    	if re.search(r'日式', tags): return "日式料理"
+    	if re.search(r'韓式|韓國', tags): return "韓式料理"
+    	if re.search(r'義大利麵|西式', tags): return "西式料理"
+    	if re.search(r'海鮮', tags): return "海鮮"
+    	if re.search(r'冰品|剉冰', tags): return "甜點冰品"
+    	if re.search(r'手搖|珍奶', tags): return "手搖飲料"
+    	if re.search(r'水餃|小籠包', tags): return "點心麵食"
 
-        return "其他"
+    # 再用 caption 全文判斷
+    	if re.search(r'麵線|拌麵|拉麵|河粉|米粉|冬粉|麵食|麵館|抄手|寬粉|餛飩|粄條|螺螄粉|意麵|酸辣粉|陽春麵|乾麵|泡麵', name): return "麵食"
+    	if re.search(r'火鍋|涮涮鍋|鍋物|薑母鴨|麻辣鍋|壽喜燒', name): return "火鍋"
+    	if re.search(r'牛排|豬排|排骨|雞排|燒肉|烤肉|串燒|烤雞|烤鴨|炭烤|炭燒|燒烤', name): return "燒烤肉類"
+    	if re.search(r'壽司|生魚片|日式|丼|天婦羅|居酒屋|關東煮|日本料理|日料|唐揚|定食', name): return "日式料理"
+    	if re.search(r'韓式|韓國|泡菜|部隊鍋|韓國烤肉', name): return "韓式料理"
+    	if re.search(r'披薩|義大利|pasta|漢堡|三明治|燉飯|薯條|義式|美式|法式|', name, re.IGNORECASE): return "西式料理"
+    	if re.search(r'咖啡|cafe|coffee|下午茶|拿鐵|', name, re.IGNORECASE): return "咖啡廳"
+    	if re.search(r'甜點|蛋糕|鬆餅|可頌|冰淇淋|布丁|馬卡龍|麵包|吐司|貝果|可麗露|費南雪|巧克力|舒芙蕾|泡芙|提拉米蘇|乳酪|毛巾捲|生乳捲|甜甜圈|蛋塔|雞蛋糕|布朗尼|奶酪|布蕾|', name): return "甜點冰品"
+    	if re.search(r'珍奶|手搖|飲料|茶飲|果汁|珍珠|波霸|鮮奶茶|奶蓋', name): return "手搖飲料"
+    	if re.search(r'早午餐|brunch', name, re.IGNORECASE): return "早午餐"
+    	if re.search(r'早餐|蛋餅|早點', name): return "早餐"
+    	if re.search(r'小籠包|水餃|煎餃|包子|饅頭|湯包|燒餅|大餅|斤餅|水潤餅|水煎包', name): return "點心麵食"
+    	if re.search(r'海鮮|蝦|生蠔|蛤蜊|螃蟹|龍蝦|干貝|鮮蚵|牡蠣|花枝|透抽', name): return "海鮮"
+    	if re.search(r'冰|剉冰|雪花冰|芋圓|豆花|霜淇淋', name): return "甜點冰品"
+    	if re.search(r'香腸|米腸|鐵板燒|炒飯|滷肉飯|控肉|魯肉|肉圓|臭豆腐|鹽酥雞|炸物|滷味|餡餅|喜餅|客家|大腸包小腸|蚵仔煎|古早味|麥芽糖|熱炒|鴨肉飯|潤餅|切仔麵|羊肉|牛雜|雞肉飯|米糕|魷魚羹|粉肝|飯包|飯糰|爌肉飯', name): return "台式小吃"
+    	if re.search(r'吃到飽|無限|任你吃', name): return "吃到飽"
+    	if re.search(r'泰式|越南|打拋|泰國|南洋|滇緬|海南雞|薑黃', name): return "東南亞料理"
+    	if re.search(r'素食|蔬食|全素|蛋奶素', name): return "素食"
+    	if re.search(r'港式|添好運|香港|飲茶', name): return "港式料理"
+    	return "其他"    
+
 
     def get_friendly_type(row):
         text = (
@@ -173,7 +217,7 @@ st.sidebar.subheader("📍 依地區與類型查詢")
 
 all_foods = [
     "咖啡甜點", "燒烤肉類", "麵食", "其他", "火鍋", "日式料理",
-    "海鮮", "西式料理", "台式小吃", "早午餐", "冰品", "手搖飲料", "點心麵食"
+    "海鮮", "西式料理", "台式小吃", "早午餐", "冰品", "手搖飲料", "點心麵食", "吃到飽"
 ]
 
 st.sidebar.subheader("🍜 美食")
