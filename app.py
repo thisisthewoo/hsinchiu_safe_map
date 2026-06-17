@@ -264,43 +264,53 @@ selected_crime_areas = st.sidebar.multiselect(
 )
 
 # ── 美食資料篩選：若有輸入路名，先依路名縮小，再套用下方篩選器 ──
-# 美食資料篩選：所有條件同時生效
-food_to_show = food_found[food_found["like_count"] >= min_likes].copy()
+food_to_show = food_found.iloc[0:0].copy()
 
-# 套用地址／路名
-if user_address and user_address.strip():
-    keyword = user_address.strip()
-    food_to_show = food_to_show[
-        food_to_show["address"].astype(str).str.contains(keyword, na=False, regex=False)
-    ]
+has_address_query = bool(user_address and user_address.strip())
+has_food_filter = bool(selected_food_areas or selected_foods or selected_friendly_types)
 
-# 套用美食地區
-if selected_food_areas:
-    food_to_show = food_to_show[
-        food_to_show["area"].isin(selected_food_areas)
-    ]
+if has_address_query or has_food_filter:
+    food_to_show = food_found[food_found["like_count"] >= min_likes].copy()
 
-# 套用食物類型
-if selected_foods:
-    food_to_show = food_to_show[
-        food_to_show["food_type"].isin(selected_foods)
-    ]
+    # 先套用地址／路名
+    if has_address_query:
+        keyword = user_address.strip()
+        food_to_show = food_to_show[
+            food_to_show["address"].astype(str).str.contains(keyword, na=False, regex=False)
+        ]
 
-# 套用友善分類
-if selected_friendly_types:
-    food_to_show = food_to_show[
-        food_to_show["friendly_type"].isin(selected_friendly_types)
-    ]
+    # 再套用美食地區
+    if selected_food_areas:
+        food_to_show = food_to_show[
+            food_to_show["area"].isin(selected_food_areas)
+        ]
+
+    # 再套用食物類型
+    if selected_foods:
+        food_to_show = food_to_show[
+            food_to_show["food_type"].isin(selected_foods)
+        ]
+
+    # 再套用友善分類
+    if selected_friendly_types:
+        food_to_show = food_to_show[
+            food_to_show["friendly_type"].isin(selected_friendly_types)
+        ]
 
 # ── 性犯罪熱點篩選：若有輸入路名，先依路名縮小，再套用地區篩選 ──
-crime_to_show = df_crime.copy()
+crime_to_show = df_crime.iloc[0:0].copy()
 
-# 套用地址／路名
-if user_address and user_address.strip():
-    keyword = user_address.strip()
-    crime_to_show = crime_to_show[
-        crime_to_show["name"].astype(str).str.contains(keyword, na=False, regex=False)
-    ]
+has_crime_filter = bool(selected_crime_areas)
+
+if has_address_query or has_crime_filter:
+    crime_to_show = df_crime.copy()
+
+    # 先套用地址／路名
+    if has_address_query:
+        keyword = user_address.strip()
+        crime_to_show = crime_to_show[
+            crime_to_show["name"].astype(str).str.contains(keyword, na=False, regex=False)
+        ]
 
     # 再套用熱點地區
     if selected_crime_areas:
@@ -328,27 +338,67 @@ m = folium.Map(
 )
 
 # 美食圖層
-food_group = folium.FeatureGroup(name="🍜 美食景點")
-
-for _, row in food_to_show.iterrows():
+# 一般美食
+food_group = folium.FeatureGroup(name="🍜 一般美食")
+for _, row in food_to_show[food_to_show["friendly_type"] == "一般"].iterrows():
     popup_text = f"""
         <img src="{row.get('thumbnail', '')}" width="200"><br>
         <b>{row['display_name']}</b><br>
         📍 {row['address']}<br>
         🏙️ {row['area']}<br>
         🍽️ {row['food_type']}<br>
-        🧩 {row['friendly_type']}<br>
         ❤️ {int(row['like_count'])} likes<br>
         📅 {row['taken_at']}<br>
         <a href="{row['post_url']}" target="_blank">📸 看原始貼文</a>
     """
-
     folium.Marker(
         location=[row["lat"], row["lon"]],
         popup=folium.Popup(popup_text, max_width=250),
-        tooltip=row["display_name"],
+        tooltip=f"🍴 {row['display_name']}",
         icon=folium.Icon(color="blue", icon="cutlery", prefix="fa")
     ).add_to(food_group)
+
+# 親子友善
+family_group = folium.FeatureGroup(name="🧒 親子友善")
+for _, row in food_to_show[food_to_show["friendly_type"] == "親子友善"].iterrows():
+    popup_text = f"""
+        <img src="{row.get('thumbnail', '')}" width="200"><br>
+        <b>{row['display_name']}</b><br>
+        📍 {row['address']}<br>
+        🏙️ {row['area']}<br>
+        🍽️ {row['food_type']}<br>
+        🧒 親子友善<br>
+        ❤️ {int(row['like_count'])} likes<br>
+        📅 {row['taken_at']}<br>
+        <a href="{row['post_url']}" target="_blank">📸 看原始貼文</a>
+    """
+    folium.Marker(
+        location=[row["lat"], row["lon"]],
+        popup=folium.Popup(popup_text, max_width=250),
+        tooltip=f"🧒 {row['display_name']}",
+        icon=folium.Icon(color="green", icon="child", prefix="fa")
+    ).add_to(family_group)
+
+# 寵物友善
+pet_group = folium.FeatureGroup(name="🐾 寵物友善")
+for _, row in food_to_show[food_to_show["friendly_type"] == "寵物友善"].iterrows():
+    popup_text = f"""
+        <img src="{row.get('thumbnail', '')}" width="200"><br>
+        <b>{row['display_name']}</b><br>
+        📍 {row['address']}<br>
+        🏙️ {row['area']}<br>
+        🍽️ {row['food_type']}<br>
+        🐾 寵物友善<br>
+        ❤️ {int(row['like_count'])} likes<br>
+        📅 {row['taken_at']}<br>
+        <a href="{row['post_url']}" target="_blank">📸 看原始貼文</a>
+    """
+    folium.Marker(
+        location=[row["lat"], row["lon"]],
+        popup=folium.Popup(popup_text, max_width=250),
+        tooltip=f"🐾 {row['display_name']}",
+        icon=folium.Icon(color="orange", icon="paw", prefix="fa")
+    ).add_to(pet_group)
 
 # 性犯罪熱點圖層
 crime_group = folium.FeatureGroup(name="⚠️ 性犯罪熱點")
@@ -377,6 +427,8 @@ for _, row in crime_to_show.iterrows():
     ).add_to(crime_group)
 
 food_group.add_to(m)
+family_group.add_to(m)
+pet_group.add_to(m)
 crime_group.add_to(m)
 folium.LayerControl().add_to(m)
 
