@@ -235,17 +235,15 @@ selected_foods = st.sidebar.multiselect(
     default=[]
 )
 
-all_friendly_types = [
-    "親子友善",
-    "寵物友善",
-    "一般"
-]
+st.sidebar.markdown("**友善分類**")
+show_general = st.sidebar.checkbox("🍜 一般美食", value=True)
+show_family = st.sidebar.checkbox("🧒 親子友善", value=True)
+show_pet = st.sidebar.checkbox("🐾 寵物友善", value=True)
 
-selected_friendly_types = st.sidebar.multiselect(
-    "友善分類",
-    options=all_friendly_types,
-    default=[]
-)
+selected_friendly_types = []
+if show_general: selected_friendly_types.append("一般")
+if show_family: selected_friendly_types.append("親子友善")
+if show_pet: selected_friendly_types.append("寵物友善")
 
 min_likes = st.sidebar.slider(
     "最低按讚數",
@@ -297,27 +295,11 @@ if has_address_query or has_food_filter:
             food_to_show["friendly_type"].isin(selected_friendly_types)
         ]
 
-# ── 性犯罪熱點篩選：若有輸入路名，先依路名縮小，再套用地區篩選 ──
-crime_to_show = df_crime.iloc[0:0].copy()
-
-has_crime_filter = bool(selected_crime_areas)
-
-if has_address_query or has_crime_filter:
+# 性犯罪熱點篩選
+if show_crime:
     crime_to_show = df_crime.copy()
-
-    # 先套用地址／路名
-    if has_address_query:
-        keyword = user_address.strip()
-        crime_to_show = crime_to_show[
-            crime_to_show["name"].astype(str).str.contains(keyword, na=False, regex=False)
-        ]
-
-    # 再套用熱點地區
-    if selected_crime_areas:
-        crime_to_show = crime_to_show[
-            crime_to_show["area"].isin(selected_crime_areas) |
-            (crime_to_show["area"] == "未分類")
-        ]
+else:
+    crime_to_show = df_crime.iloc[0:0].copy()
 
 # ── 標題 ──────────────────────────────────────────────────
 st.title("🗺️ 新竹安心出遊地圖")
