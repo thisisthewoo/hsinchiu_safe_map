@@ -293,19 +293,14 @@ if selected_friendly_types:
     ]
 
 # ── 性犯罪熱點篩選：若有輸入路名，先依路名縮小，再套用地區篩選 ──
-crime_to_show = df_crime.iloc[0:0].copy()
+crime_to_show = df_crime.copy()
 
-has_crime_filter = bool(selected_crime_areas)
-
-if has_address_query or has_crime_filter:
-    crime_to_show = df_crime.copy()
-
-    # 先套用地址／路名
-    if has_address_query:
-        keyword = user_address.strip()
-        crime_to_show = crime_to_show[
-            crime_to_show["name"].astype(str).str.contains(keyword, na=False, regex=False)
-        ]
+# 套用地址／路名
+if user_address and user_address.strip():
+    keyword = user_address.strip()
+    crime_to_show = crime_to_show[
+        crime_to_show["name"].astype(str).str.contains(keyword, na=False, regex=False)
+    ]
 
     # 再套用熱點地區
     if selected_crime_areas:
