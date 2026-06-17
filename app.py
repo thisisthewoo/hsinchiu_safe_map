@@ -194,14 +194,6 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     return R * c
 
 # ── 側邊篩選器 ────────────────────────────────────────────
-st.sidebar.subheader("📍 地址／路名查詢")
-
-user_address = st.sidebar.text_input(
-    "輸入地址或路名",
-    placeholder="例如：光復路、東門街、新竹市東區學府路",
-    key="address_search_input"
-)
-
 st.sidebar.title("🔍 篩選器")
 
 all_areas = [
@@ -211,30 +203,19 @@ all_areas = [
     "橫山鄉", "北埔鄉", "寶山鄉", "峨眉鄉"
 ]
 
-crime_areas = ["東區", "北區", "香山區", "竹北市", "竹東鎮", "湖口鄉", "新埔鎮", "關西鎮", "新豐鄉", "芎林鄉", "橫山鄉", "北埔鄉", "寶山鄉", "峨眉鄉"]
-st.sidebar.subheader("📍 依地區與類型查詢")
-
-
 all_foods = [
     "咖啡廳", "甜點冰品", "麵食", "燒烤肉類", "日式料理", "火鍋",
     "台式小吃", "西式料理", "早午餐", "點心麵食", "海鮮", "早餐",
     "韓式料理", "手搖飲料", "東南亞料理", "素食", "港式料理", "吃到飽"
 ]
 
-st.sidebar.subheader("🍜 美食")
+# 性犯罪熱點
+st.sidebar.subheader("⚠️ 性犯罪熱點")
+show_crime = st.sidebar.checkbox("顯示性犯罪熱點", value=True)
 
-selected_food_areas = st.sidebar.multiselect(
-    "美食地區",
-    options=all_areas,
-    default=[]
-)
+st.sidebar.subheader("🍜 美食篩選")
 
-selected_foods = st.sidebar.multiselect(
-    "食物類型",
-    options=all_foods,
-    default=[]
-)
-
+# 友善分類
 st.sidebar.markdown("**友善分類**")
 show_general = st.sidebar.checkbox("🍜 一般美食", value=True)
 show_family = st.sidebar.checkbox("🧒 親子友善", value=True)
@@ -245,6 +226,21 @@ if show_general: selected_friendly_types.append("一般")
 if show_family: selected_friendly_types.append("親子友善")
 if show_pet: selected_friendly_types.append("寵物友善")
 
+# 地區
+selected_food_areas = st.sidebar.multiselect(
+    "地區",
+    options=all_areas,
+    default=[]
+)
+
+# 食物類型
+selected_foods = st.sidebar.multiselect(
+    "食物類型",
+    options=all_foods,
+    default=[]
+)
+
+# 最低按讚數
 min_likes = st.sidebar.slider(
     "最低按讚數",
     0,
@@ -253,14 +249,19 @@ min_likes = st.sidebar.slider(
     step=100
 )
 
-st.sidebar.subheader("⚠️ 性犯罪熱點")
-show_crime = st.sidebar.checkbox("顯示性犯罪熱點", value=True)
+# 地址路名查詢
+st.sidebar.subheader("📍 地址／路名查詢")
+user_address = st.sidebar.text_input(
+    "輸入地址或路名",
+    placeholder="例如：光復路、東門街、新竹市東區學府路",
+    key="address_search_input"
+)
 
 # ── 美食資料篩選：若有輸入路名，先依路名縮小，再套用下方篩選器 ──
 food_to_show = food_found.iloc[0:0].copy()
 
 has_address_query = bool(user_address and user_address.strip())
-has_food_filter = bool(selected_food_areas or selected_foods or selected_friendly_types)
+has_food_filter = bool(selected_food_areas or selected_foods)
 
 if has_address_query or has_food_filter:
     food_to_show = food_found[food_found["like_count"] >= min_likes].copy()
