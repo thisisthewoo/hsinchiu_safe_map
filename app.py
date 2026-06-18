@@ -71,7 +71,7 @@ def load_data():
         cap = str(row.get("caption", ""))
         tags = " ".join(re.findall(r'#(\w+)', cap))
         name = str(row.get("display_name", "")) + cap
-
+ 
         # 優先用 hashtag 判斷
         if re.search(r'港式|飲茶', tags): return "港式料理"
         if re.search(r'泰式|越南|南洋|東南亞', tags): return "東南亞料理"
@@ -89,7 +89,7 @@ def load_data():
         if re.search(r'冰品|剉冰', tags): return "甜點冰品"
         if re.search(r'手搖|珍奶', tags): return "手搖飲料"
         if re.search(r'水餃|小籠包', tags): return "點心麵食"
-
+ 
         # 再用 caption 全文判斷
         if re.search(r'港式|添好運|香港|飲茶', name): return "港式料理"
         if re.search(r'泰式|越南|打拋|泰國|南洋|滇緬|海南雞|薑黃', name): return "東南亞料理"
@@ -110,7 +110,41 @@ def load_data():
         if re.search(r'冰|剉冰|雪花冰|芋圓|豆花|霜淇淋', name): return "甜點冰品"
         if re.search(r'香腸|米腸|鐵板燒|炒飯|滷肉飯|控肉|魯肉|肉圓|臭豆腐|鹽酥雞|炸物|滷味|餡餅|喜餅|客家|大腸包小腸|蚵仔煎|古早味|麥芽糖|熱炒|鴨肉飯|潤餅|切仔麵|羊肉|牛雜|雞肉飯|米糕|魷魚羹|粉肝|飯包|飯糰|爌肉飯', name): return "台式小吃"
         if re.search(r'吃到飽|無限|任你吃', name): return "吃到飽"
-        return "其他"
+        return "其他"  
+
+
+    def get_friendly_type(row):
+        text = (
+            str(row.get("display_name", "")) +
+            str(row.get("caption", "")) +
+            str(row.get("address", ""))
+        )
+
+        # 親子友善：需要「親子/兒童/小孩/孩子」
+        family_target_keywords = r"親子|兒童|小孩|孩子|小朋友|寶寶|嬰兒|親子友善|兒童友善"
+
+        # 寵物友善：需要「寵物/毛孩/狗/貓」
+        pet_target_keywords = r"寵物|毛孩|毛小孩|狗狗|貓咪|狗|貓|寵物友善|寵物餐廳|汪星人|喵星人"
+
+        family = (
+            re.search(family_target_keywords, text)
+        )
+
+        pet = (
+            re.search(pet_target_keywords, text)
+        )
+
+        if family:
+            return "親子友善"
+
+        if pet:
+            return "寵物友善"
+
+        return "一般"
+
+    food["area"] = food.apply(get_area_from_district, axis=1)
+    food["area"] = food.apply(fix_area, axis=1)
+    food = food[food["area"] != "其他"].copy()
     food["food_type"] = food.apply(get_food_type, axis=1)
     food["friendly_type"] = food.apply(get_friendly_type, axis=1)
 
