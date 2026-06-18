@@ -10,7 +10,7 @@ import math
 
 st.set_page_config(page_title="新竹安心出遊地圖", layout="wide")
 
-# ── 讀取資料 ──────────────────────────────────────────────
+# 讀取資料
 @st.cache_data
 def load_data():
     # 美食資料
@@ -193,7 +193,7 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return R * c
 
-# ── 側邊篩選器 ────────────────────────────────────────────
+# 側邊篩選器
 st.sidebar.title("🔍 篩選器")
 
 all_areas = [
@@ -257,7 +257,7 @@ user_address = st.sidebar.text_input(
     key="address_search_input"
 )
 
-# ── 美食資料篩選：若有輸入路名，先依路名縮小，再套用下方篩選器 ──
+# 美食資料篩選：若有輸入路名，先依路名縮小，再套用下方篩選器
 food_to_show = food_found.iloc[0:0].copy()
 
 has_address_query = bool(user_address and user_address.strip())
@@ -297,7 +297,7 @@ if show_crime:
 else:
     crime_to_show = df_crime.iloc[0:0].copy()
 
-# ── 標題 ──────────────────────────────────────────────────
+# 標題
 st.title("🗺️ 新竹安心出遊地圖")
 
 if food_to_show.empty and crime_to_show.empty:
@@ -308,7 +308,7 @@ else:
 f"性犯罪熱點 **{len(crime_to_show)}** 筆"
     )
 
-# ── 地圖 ──────────────────────────────────────────────────
+# 地圖
 m = folium.Map(
     location=[24.80, 120.97],
     zoom_start=13,
