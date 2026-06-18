@@ -68,81 +68,49 @@ def load_data():
 
 	# 食物分類
     def get_food_type(row):
-    	cap = str(row.get("caption", ""))
-    	tags = " ".join(re.findall(r'#(\w+)', cap))
-    	name = str(row.get("display_name", "")) + cap
+        cap = str(row.get("caption", ""))
+        tags = " ".join(re.findall(r'#(\w+)', cap))
+        name = str(row.get("display_name", "")) + cap
 
-    # 優先用 hashtag 判斷
-    	if re.search(r'咖啡廳|咖啡|下午茶', tags): return "咖啡廳"
-    	if re.search(r'甜點|蛋糕|冰淇淋', tags): return "甜點冰品"
-    	if re.search(r'火鍋', tags): return "火鍋"
-    	if re.search(r'早午餐', tags): return "早午餐"
-    	if re.search(r'早餐', tags): return "早餐"
-    	if re.search(r'燒肉|烤肉', tags): return "燒烤肉類"
-    	if re.search(r'拉麵|米粉|麵食', tags): return "麵食"
-    	if re.search(r'日式', tags): return "日式料理"
-    	if re.search(r'韓式|韓國', tags): return "韓式料理"
-    	if re.search(r'義大利麵|西式', tags): return "西式料理"
-    	if re.search(r'海鮮', tags): return "海鮮"
-    	if re.search(r'冰品|剉冰', tags): return "甜點冰品"
-    	if re.search(r'手搖|珍奶', tags): return "手搖飲料"
-    	if re.search(r'水餃|小籠包', tags): return "點心麵食"
+        # 優先用 hashtag 判斷
+        if re.search(r'港式|飲茶', tags): return "港式料理"
+        if re.search(r'泰式|越南|南洋|東南亞', tags): return "東南亞料理"
+        if re.search(r'咖啡廳|咖啡|下午茶', tags): return "咖啡廳"
+        if re.search(r'甜點|蛋糕|冰淇淋', tags): return "甜點冰品"
+        if re.search(r'火鍋', tags): return "火鍋"
+        if re.search(r'早午餐', tags): return "早午餐"
+        if re.search(r'早餐', tags): return "早餐"
+        if re.search(r'燒肉|烤肉', tags): return "燒烤肉類"
+        if re.search(r'拉麵|米粉|麵食', tags): return "麵食"
+        if re.search(r'日式', tags): return "日式料理"
+        if re.search(r'韓式|韓國', tags): return "韓式料理"
+        if re.search(r'義大利麵|西式', tags): return "西式料理"
+        if re.search(r'海鮮', tags): return "海鮮"
+        if re.search(r'冰品|剉冰', tags): return "甜點冰品"
+        if re.search(r'手搖|珍奶', tags): return "手搖飲料"
+        if re.search(r'水餃|小籠包', tags): return "點心麵食"
 
-    # 再用 caption 全文判斷
-    	if re.search(r'麵線|拌麵|拉麵|河粉|米粉|冬粉|麵食|麵館|抄手|寬粉|餛飩|粄條|螺螄粉|意麵|酸辣粉|陽春麵|乾麵|泡麵', name): return "麵食"
-    	if re.search(r'火鍋|涮涮鍋|鍋物|薑母鴨|麻辣鍋|壽喜燒', name): return "火鍋"
-    	if re.search(r'牛排|豬排|排骨|雞排|燒肉|烤肉|串燒|烤雞|烤鴨|炭烤|炭燒|燒烤', name): return "燒烤肉類"
-    	if re.search(r'壽司|生魚片|日式|丼|天婦羅|居酒屋|關東煮|日本料理|日料|唐揚|定食', name): return "日式料理"
-    	if re.search(r'韓式|韓國|泡菜|部隊鍋|韓國烤肉', name): return "韓式料理"
-    	if re.search(r'披薩|義大利|pasta|漢堡|三明治|燉飯|薯條|義式|美式|法式|', name, re.IGNORECASE): return "西式料理"
-    	if re.search(r'咖啡|cafe|coffee|下午茶|拿鐵|', name, re.IGNORECASE): return "咖啡廳"
-    	if re.search(r'甜點|蛋糕|鬆餅|可頌|冰淇淋|布丁|馬卡龍|麵包|吐司|貝果|可麗露|費南雪|巧克力|舒芙蕾|泡芙|提拉米蘇|乳酪|毛巾捲|生乳捲|甜甜圈|蛋塔|雞蛋糕|布朗尼|奶酪|布蕾|', name): return "甜點冰品"
-    	if re.search(r'珍奶|手搖|飲料|茶飲|果汁|珍珠|波霸|鮮奶茶|奶蓋', name): return "手搖飲料"
-    	if re.search(r'早午餐|brunch', name, re.IGNORECASE): return "早午餐"
-    	if re.search(r'早餐|蛋餅|早點', name): return "早餐"
-    	if re.search(r'小籠包|水餃|煎餃|包子|饅頭|湯包|燒餅|大餅|斤餅|水潤餅|水煎包', name): return "點心麵食"
-    	if re.search(r'海鮮|蝦|生蠔|蛤蜊|螃蟹|龍蝦|干貝|鮮蚵|牡蠣|花枝|透抽', name): return "海鮮"
-    	if re.search(r'冰|剉冰|雪花冰|芋圓|豆花|霜淇淋', name): return "甜點冰品"
-    	if re.search(r'香腸|米腸|鐵板燒|炒飯|滷肉飯|控肉|魯肉|肉圓|臭豆腐|鹽酥雞|炸物|滷味|餡餅|喜餅|客家|大腸包小腸|蚵仔煎|古早味|麥芽糖|熱炒|鴨肉飯|潤餅|切仔麵|羊肉|牛雜|雞肉飯|米糕|魷魚羹|粉肝|飯包|飯糰|爌肉飯', name): return "台式小吃"
-    	if re.search(r'吃到飽|無限|任你吃', name): return "吃到飽"
-    	if re.search(r'泰式|越南|打拋|泰國|南洋|滇緬|海南雞|薑黃', name): return "東南亞料理"
-    	if re.search(r'素食|蔬食|全素|蛋奶素', name): return "素食"
-    	if re.search(r'港式|添好運|香港|飲茶', name): return "港式料理"
-    	return "其他"    
-
-
-    def get_friendly_type(row):
-        text = (
-            str(row.get("display_name", "")) +
-            str(row.get("caption", "")) +
-            str(row.get("address", ""))
-        )
-
-        # 親子友善：需要「親子/兒童/小孩/孩子」
-        family_target_keywords = r"親子|兒童|小孩|孩子|小朋友|寶寶|嬰兒|親子友善|兒童友善"
-
-        # 寵物友善：需要「寵物/毛孩/狗/貓」
-        pet_target_keywords = r"寵物|毛孩|毛小孩|狗狗|貓咪|狗|貓|寵物友善|寵物餐廳|汪星人|喵星人"
-
-        family = (
-            re.search(family_target_keywords, text)
-        )
-
-        pet = (
-            re.search(pet_target_keywords, text)
-        )
-
-        if family:
-            return "親子友善"
-
-        if pet:
-            return "寵物友善"
-
-        return "一般"
-
-    food["area"] = food.apply(get_area_from_district, axis=1)
-    food["area"] = food.apply(fix_area, axis=1)
-    food = food[food["area"] != "其他"].copy()
+        # 再用 caption 全文判斷
+        if re.search(r'港式|添好運|香港|飲茶', name): return "港式料理"
+        if re.search(r'泰式|越南|打拋|泰國|南洋|滇緬|海南雞|薑黃', name): return "東南亞料理"
+        if re.search(r'素食|蔬食|全素|蛋奶素', name): return "素食"
+        if re.search(r'麵線|拌麵|拉麵|河粉|米粉|冬粉|麵食|麵館|抄手|寬粉|餛飩|粄條|螺螄粉|意麵|酸辣粉|陽春麵|乾麵|泡麵', name): return "麵食"
+        if re.search(r'火鍋|涮涮鍋|鍋物|薑母鴨|麻辣鍋|壽喜燒', name): return "火鍋"
+        if re.search(r'牛排|豬排|排骨|雞排|燒肉|烤肉|串燒|烤雞|烤鴨|炭烤|炭燒|燒烤', name): return "燒烤肉類"
+        if re.search(r'壽司|生魚片|日式|丼|天婦羅|居酒屋|關東煮|日本料理|日料|唐揚|定食', name): return "日式料理"
+        if re.search(r'韓式|韓國|泡菜|部隊鍋|韓國烤肉', name): return "韓式料理"
+        if re.search(r'披薩|義大利|pasta|漢堡|三明治|燉飯|薯條|義式|美式|法式', name, re.IGNORECASE): return "西式料理"
+        if re.search(r'咖啡|cafe|coffee|下午茶|拿鐵', name, re.IGNORECASE): return "咖啡廳"
+        if re.search(r'甜點|蛋糕|鬆餅|可頌|冰淇淋|布丁|馬卡龍|麵包|吐司|貝果|可麗露|費南雪|巧克力|舒芙蕾|泡芙|提拉米蘇|乳酪|毛巾捲|生乳捲|甜甜圈|蛋塔|雞蛋糕|布朗尼|奶酪|布蕾', name): return "甜點冰品"
+        if re.search(r'珍奶|手搖|飲料|茶飲|果汁|珍珠|波霸|鮮奶茶|奶蓋', name): return "手搖飲料"
+        if re.search(r'早午餐|brunch', name, re.IGNORECASE): return "早午餐"
+        if re.search(r'早餐|蛋餅|早點', name): return "早餐"
+        if re.search(r'小籠包|水餃|煎餃|包子|饅頭|湯包|燒餅|大餅|斤餅|水潤餅|水煎包', name): return "點心麵食"
+        if re.search(r'海鮮|蝦|生蠔|蛤蜊|螃蟹|龍蝦|干貝|鮮蚵|牡蠣|花枝|透抽', name): return "海鮮"
+        if re.search(r'冰|剉冰|雪花冰|芋圓|豆花|霜淇淋', name): return "甜點冰品"
+        if re.search(r'香腸|米腸|鐵板燒|炒飯|滷肉飯|控肉|魯肉|肉圓|臭豆腐|鹽酥雞|炸物|滷味|餡餅|喜餅|客家|大腸包小腸|蚵仔煎|古早味|麥芽糖|熱炒|鴨肉飯|潤餅|切仔麵|羊肉|牛雜|雞肉飯|米糕|魷魚羹|粉肝|飯包|飯糰|爌肉飯', name): return "台式小吃"
+        if re.search(r'吃到飽|無限|任你吃', name): return "吃到飽"
+        return "其他"
     food["food_type"] = food.apply(get_food_type, axis=1)
     food["friendly_type"] = food.apply(get_friendly_type, axis=1)
 
